@@ -1,6 +1,7 @@
 import re
 
 from parser import parser
+from process import process_equation
 
 """
 Examples:
@@ -15,10 +16,13 @@ Examples:
 X2-5X-10=0
 5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0
 - 5 * X^0 + 4 * X^1 = 4 * X^0
-8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0 + 5X / 2 +5  - -5
+8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0 + 5X / 2 +5  - -5 -9 - 70
 """
 
 if __name__ == "__main__":
     norm_regex = re.compile(
         r'\s*(([+-=*/ ]|^)?\s*((?:-)?\d+(?:\.\d+)?)?\s*(?:(?:[*\\])?\s*(X)\s*(?:\^\s*((?:-)?\d+(?:\.\d+)?))?)?)')
-    equations_list = parser(norm_regex)
+    parsed_equations_list = parser(norm_regex)
+
+    for parsed_equation in parsed_equations_list:
+        process_equation(parsed_equation)

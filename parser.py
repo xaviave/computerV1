@@ -1,8 +1,11 @@
 import re
 import sys
 
+from typing import List
+
 from Error_handler import ParserError
 from Polynomial import PolyRows
+
 
 
 def _check_argv() -> list:
@@ -14,7 +17,7 @@ def _check_argv() -> list:
     if len(sys.argv) < 2:
         raise ParserError("Not enough argument")
 
-    # A changer.
+    print("WARNING: A changer le re.compile.\n")
     exception_char = re.compile(r"[a-zA-VY-Z]+")
     for av in sys.argv[1:]:
         bad_char = exception_char.findall(av)
@@ -31,18 +34,20 @@ def _parse_equation(norm_regex, equation: str):
     for i, token in enumerate(token_equations):
         token_equations[i] = [t for t in token if t]
 
+    parse_tokens = []
     for token in token_equations:
-        right = 1 if '=' in equation else 0
+        right = True if '=' in equation else False
         if len(set(token)) == 1:
             raise ParserError("The equation isn't mathematics: their can only have 2 signs next each other")
-        token = PolyRows(token, right)
-        print(token)
+        parse_tokens.append(PolyRows(token, right))
+    return parse_tokens
 
 
-def parser(norm_regex) -> list:
+def parser(norm_regex) -> List[List[PolyRows]]:
     equations_list = _check_argv()
 
+    parsed_equations = []
     for equation in equations_list:
-        equation = _parse_equation(norm_regex, equation)
+        parsed_equations.append(_parse_equation(norm_regex, equation))
 
-    return equations_list
+    return parsed_equations
