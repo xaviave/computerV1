@@ -16,7 +16,14 @@ Examples:
 X2-5X-10=0
 5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0
 - 5 * X^0 + 4 * X^1 = 4 * X^0
-8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0 + 5X / 2 +5  - -5 -9 - 70
+8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^2 = 3 * X^0 + 5X / 2 +5  - -5 -9 - 70
+"""
+
+"""
+Bonus: - color
+       - graph avec numpy
+       - explication du code ligne par ligne
+       - comprehension de l'equation a l'ecrit
 """
 
 if __name__ == "__main__":

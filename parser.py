@@ -7,7 +7,6 @@ from Error_handler import ParserError
 from Polynomial import PolyRows
 
 
-
 def _check_argv() -> list:
     """
     Check the verbose of the argvs
@@ -17,13 +16,19 @@ def _check_argv() -> list:
     if len(sys.argv) < 2:
         raise ParserError("Not enough argument")
 
-    print("WARNING: A changer le re.compile.\n")
+    print("WARNING: A changer le re.compile.\n * et // ne fonxtionne pas")
     exception_char = re.compile(r"[a-zA-VY-Z]+")
     for av in sys.argv[1:]:
         bad_char = exception_char.findall(av)
         if bad_char:
             raise ParserError("Bad characters in the equation(s) : {}".format(bad_char))
     return sys.argv[1:]
+
+
+def _check_coef(tokens_list: List[PolyRows]):
+    for token in tokens_list:
+        if token.degree > 2:
+            raise ParserError("The coefficient of the variable 'X' is superior as '2' : {}".format(token))
 
 
 def _parse_equation(norm_regex, equation: str):
@@ -35,11 +40,15 @@ def _parse_equation(norm_regex, equation: str):
         token_equations[i] = [t for t in token if t]
 
     parse_tokens = []
+    right = False
     for token in token_equations:
-        right = True if '=' in equation else False
+        equal = True if '=' in token else False
+        if equal:
+            right = True
         if len(set(token)) == 1:
             raise ParserError("The equation isn't mathematics: their can only have 2 signs next each other")
-        parse_tokens.append(PolyRows(token, right))
+        parse_tokens.append(PolyRows(token, right, equal))
+    _check_coef(parse_tokens)
     return parse_tokens
 
 
