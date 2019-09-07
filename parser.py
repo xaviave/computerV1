@@ -38,7 +38,9 @@ def _parse_equation(norm_regex, equation: str):
     token_equations = norm_regex.findall(equation)[:-1]
     for i, token in enumerate(token_equations):
         token_equations[i] = [t for t in token if t]
-
+    for t in token_equations:
+        print(t)
+    print("\n\n")
     parse_tokens = []
     right = False
     for token in token_equations:
