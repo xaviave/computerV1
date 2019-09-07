@@ -38,6 +38,7 @@ class PolyRows:
     def __get_coef2(self, tokens_list: List[str]):
         try:
             i = tokens_list.index("*")
+            print(tokens_list)
             self.coef2 = float(tokens_list[i + 1])
             self.sign2 = "*"
         except ValueError:
@@ -46,7 +47,7 @@ class PolyRows:
             self.sign2 = "/"
 
     def __init__(self, tokens_list: List[str], right: bool, equal: bool):
-        self.sign = ""
+        self.sign = "+"
         self.sign2 = ""
         self.coef = 0
         self.coef2 = 0
@@ -69,29 +70,29 @@ class PolyRows:
         if any(["*" in tokens_list, "/" in tokens_list]):
             self.__get_coef2(tokens_list)
 
-        print(f"sign = {self.sign}, coef = {self.coef}, degree = {self.degree}, coef2 = {self.coef2}, sign2 = {self.sign2}")
+        # print(f"sign = {self.sign}, coef = {self.coef}, degree = {self.degree}, coef2 = {self.coef2}, sign2 = {self.sign2} | {self.term}")
 
     def __str__(self):
         return self.term
 
-    def __get_sign(self) -> str:
-        if self.coef > 0 and self.sign == "-":
-            return "-"
-        elif self.coef < 0 and self.sign == "-":
+    @staticmethod
+    def __get_sign(coef, sign) -> str:
+        if coef < 0 and sign == "-":
             return "+"
         else:
-            return self.sign
+            return sign
 
     def create_term(self, position):
         self.term = "" if (position == 0 or self.equal == "= ") and self.sign == '+' else self.sign + " "
+        self.term += str(self.coef)
+        if self.coef2:
+            self.term += " " + self.sign2 + " " + str(self.coef2)
         if self.degree != 0:
-            self.term += str(self.coef)
-            if self.coef2:
-                self.term += self.sign2 + str(self.coef2)
             self.term += " * X^" + str(self.degree)
 
     def change_sign(self, position):
-        self.sign = self.__get_sign()
+        self.sign = self.__get_sign(self.coef, self.sign)
+        self.sign2 = self.__get_sign(self.coef2, self.sign2)
         self.coef = abs(self.coef)
         self.create_term(position)
 

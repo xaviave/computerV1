@@ -16,7 +16,7 @@ def _check_argv() -> list:
     if len(sys.argv) < 2:
         raise ParserError("Not enough argument")
 
-    print("WARNING: A changer le re.compile.\n * et // ne fonxtionne pas")
+    print("WARNING: A changer le re.compile.\n X * X * X * X ne fonctionne pas, faire un regex avec repetion, Refaire le traitement du signe")
     exception_char = re.compile(r"[a-zA-VY-Z]+")
     for av in sys.argv[1:]:
         bad_char = exception_char.findall(av)
@@ -38,9 +38,11 @@ def _parse_equation(norm_regex, equation: str):
     token_equations = norm_regex.findall(equation)[:-1]
     for i, token in enumerate(token_equations):
         token_equations[i] = [t for t in token if t]
+    """
     for t in token_equations:
         print(t)
     print("\n\n")
+    """
     parse_tokens = []
     right = False
     for token in token_equations:
