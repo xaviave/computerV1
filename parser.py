@@ -1,66 +1,53 @@
 import re
 import sys
 
-from typing import List
-
-from Error_handler import ParserError
 from Polynomial import PolyRows
+from Error_handler import ParserError
 
 
-def _check_argv() -> list:
+def __check_argv():
     """
     Check the verbose of the argvs
 
     :return: list of the argv to parse
     """
+    graph = 0
     if len(sys.argv) < 2:
         raise ParserError("Not enough argument")
 
-    print("WARNING: A changer le re.compile.\n X * X * X * X ne fonctionne pas, faire un regex avec repetion, Refaire le traitement du signe")
-    exception_char = re.compile(r"[a-zA-VY-Z]+")
+    exception_char = re.compile(r"[\s\dX\+\-\/\*\=\^\.]+")
     for av in sys.argv[1:]:
-        bad_char = exception_char.findall(av)
-        if bad_char:
-            raise ParserError("Bad characters in the equation(s) : {}".format(bad_char))
-    return sys.argv[1:]
+        bad_char = exception_char.match(av)
+        print("---- ", bad_char)
+        if av == "-g":
+            graph = 1
+            sys.argv.remove("-g")
+        elif not bad_char:
+            raise ParserError(f"Bad characters in the equation : '{av}' | Only number, 'X', '/', '*', '+', '-', '.', '^' and '=' are authorized")
+        elif av.count('=') != 1:
+            raise ParserError(f"The equation isn't mathematics: there's {av.count('=') - 1} much \'=\' in the arg: {av}")
+    return sys.argv[1:], graph
 
 
-def _check_coef(tokens_list: List[PolyRows]):
-    for token in tokens_list:
-        if token.degree > 2:
-            raise ParserError("The coefficient of the variable 'X' is superior as '2' : {}".format(token))
-
-
-def _parse_equation(norm_regex, equation: str):
-    if equation.count('=') != 1:
-        raise ParserError("The equation isn't mathematics: there's {} much \'=\'".format(equation.count('=') - 1))
-
-    token_equations = norm_regex.findall(equation)[:-1]
-    for i, token in enumerate(token_equations):
-        token_equations[i] = [t for t in token if t]
-    """
-    for t in token_equations:
-        print(t)
-    print("\n\n")
-    """
-    parse_tokens = []
+def __parse_equation(norm_regex, equation: str) -> list:
     right = False
-    for token in token_equations:
+    tokens_equation = []
+    tokens_tuple = norm_regex.findall(equation)[:-1]
+    for i, token in enumerate(tokens_tuple):
         equal = True if '=' in token else False
         if equal:
             right = True
         if len(set(token)) == 1:
             raise ParserError("The equation isn't mathematics: their can only have 2 signs next each other")
-        parse_tokens.append(PolyRows(token, right, equal))
-    _check_coef(parse_tokens)
-    return parse_tokens
+        tokens_equation.append(PolyRows(token, right, equal, i))
+    return tokens_equation
 
 
-def parser(norm_regex) -> List[List[PolyRows]]:
-    equations_list = _check_argv()
+def parser():
+    equations_list, graph = __check_argv()
 
-    parsed_equations = []
+    equations_token_list = []
+    norm_regex = re.compile(r"\s*(?P<signe>[\*\/\+\-\=\s])?\s*(?:(?P<coef>(?:-\s*)?\d+(?:\.\d+)?)?\s*(?:(?:\*)?\s*(?P<x>X)\s*(?:\^\s*(?P<degree>(?:-\s*)?\d+(?:\.\d+)?))?)?)")
     for equation in equations_list:
-        parsed_equations.append(_parse_equation(norm_regex, equation))
-
-    return parsed_equations
+        equations_token_list.append(__parse_equation(norm_regex, equation))
+    return equations_token_list, graph

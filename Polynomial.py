@@ -1,3 +1,5 @@
+import re
+
 from typing import List
 
 from Error_handler import ParserError
@@ -7,96 +9,95 @@ class PolyRows:
     """
     term: complete form
     coef: number that compose the form
-    coef2: number that compose the form but after the Xm can only be '*' or '/'
     degree: 'power' of X
     right: True if the form is in the right side of '='
     """
     term: str
-    sign: str
+    operator: str
     coef: float
-    coef2: float
     degree: int
     right: bool
     equal: str
+    position: int
+    change: int
 
-    def __get_degree(self, tokens_list: List[str]):
-        if not self.coef and tokens_list[1] == "X":
-            tokens_list.insert(1, "1")
+    def __get_degree(self, tokens_tuple: List[str]):
+        if not tokens_tuple[1] and tokens_tuple[2] == "X":
             self.coef = 1
         else:
-            self.coef = float(tokens_list[1])
-        try:
-            if '.' in tokens_list[3]:
-                raise ParserError("The degree is a float, it musts be an integer : {}".format(tokens_list))
-            if tokens_list[3] in ["/", "*"]:
-                self.degree = 1
-            else:
-                self.degree = int(tokens_list[3])
-        except IndexError:
-            self.degree = 0
+            self.coef = float(re.sub(r"\s*", "", tokens_tuple[1]))
 
-    def __get_coef2(self, tokens_list: List[str]):
         try:
-            i = tokens_list.index("*")
-            print(tokens_list)
-            self.coef2 = float(tokens_list[i + 1])
-            self.sign2 = "*"
+            if '.' in tokens_tuple[3]:
+                raise ParserError(f"The degree is a float, it musts be an integer : {tokens_tuple}")
+            self.degree = int(re.sub(r"\s*", "", tokens_tuple[3]))
+            if self.degree > 2:
+                self.create_term(self.position)
+                raise ParserError(f"The degree must be inferior or equal to 2, here : {self.degree} in this term: '{self.term}'")
         except ValueError:
-            i = tokens_list.index("/")
-            self.coef2 = float(tokens_list[i + 1])
-            self.sign2 = "/"
+            self.degree = 1
 
-    def __init__(self, tokens_list: List[str], right: bool, equal: bool):
-        self.sign = "+"
-        self.sign2 = ""
+    def __init__(self, tokens_tuple, right: bool, equal: bool, position: int):
+        self.change = 1
+        self.term = ""
+        self.operator = "+"
         self.coef = 0
-        self.coef2 = 0
         self.degree = 0
         self.right = right
+        self.position = position
         self.equal = "= " if equal else ""
 
-        if tokens_list[1] == '=':
-            tokens_list.pop(1)
-            tokens_list[0] = tokens_list[0][1:]
-        self.term = tokens_list.pop(0).strip()
-
-        if tokens_list[0] not in ["+", "-"]:
-            tokens_list.insert(0, "+")
-        self.sign = tokens_list[0]
-        if "X" in tokens_list:
-            self.__get_degree(tokens_list)
+        if (tokens_tuple[0] in ["=", "*", "/"] and position == 0) or (not tokens_tuple[0] and position > 0):
+            raise ParserError(f"The equation can't start with this operator : '{tokens_tuple[0]}', '{tokens_tuple[1]}{tokens_tuple[2]}{tokens_tuple[3]}'")
+        if tokens_tuple[0] not in ["-", "+", "=", "*", "/", ""]:
+            raise ParserError(f"Bad or absent operator at position {position * 4}")
+        elif tokens_tuple[0] in ["=", ""]:
+            self.operator = "+"
         else:
-            self.coef = float(tokens_list[1])
-        if any(["*" in tokens_list, "/" in tokens_list]):
-            self.__get_coef2(tokens_list)
+            self.operator = tokens_tuple[0]
 
-        # print(f"sign = {self.sign}, coef = {self.coef}, degree = {self.degree}, coef2 = {self.coef2}, sign2 = {self.sign2} | {self.term}")
+        if tokens_tuple[2] == "X":
+            self.__get_degree(tokens_tuple)
+        elif tokens_tuple[2] or tokens_tuple[3]:
+            raise ParserError(f"Bad or absent operator at position {position * 4 + position}")
+        else:
+            self.coef = float(re.sub(r"\s*", "", tokens_tuple[1]))
+
+        self.create_term(position)
+        #print(f"equal = '{self.equal}', operator = '{self.operator}', coef = '{self.coef}', degree = '{self.degree}' | '{self.term}'")
 
     def __str__(self):
         return self.term
 
-    @staticmethod
-    def __get_sign(coef, sign) -> str:
-        if coef < 0 and sign == "-":
-            return "+"
-        else:
-            return sign
+    def __get_operator(self):
+        if (self.coef < 0 and self.operator == "-") or self.coef == 0:
+            self.operator = "+"
+            self.coef = abs(self.coef)
+        elif self.coef > 0 and self.operator == "-":
+            self.operator = "-"
+            self.coef = abs(self.coef)
 
     def create_term(self, position):
-        self.term = "" if (position == 0 or self.equal == "= ") and self.sign == '+' else self.sign + " "
+        term = self.term
+        self.__get_operator()
+        self.term = ""
+        if (position == 0 or self.equal == "= ") and self.operator == '+':
+            self.term = ""
+        elif self.operator:
+            self.term = self.operator + " "
         self.term += str(self.coef)
-        if self.coef2:
-            self.term += " " + self.sign2 + " " + str(self.coef2)
         if self.degree != 0:
             self.term += " * X^" + str(self.degree)
-
-    def change_sign(self, position):
-        self.sign = self.__get_sign(self.coef, self.sign)
-        self.sign2 = self.__get_sign(self.coef2, self.sign2)
-        self.coef = abs(self.coef)
-        self.create_term(position)
+        if self.term != term:
+            self.change = True
 
     def change_sign_form_equal(self, position):
-        self.right = False
         self.equal = ''
-        self.change_sign(position)
+        if self.right:
+            if self.operator == "-":
+                self.operator = "+"
+            else:
+                self.operator = "-"
+        self.right = False
+        self.create_term(position)
+
