@@ -11,8 +11,8 @@ def __change_equation(tokens_equations: List[PolyRows]) -> bool:
     return False
 
 
-def __print_row_equation(message: str, token_equations: List[PolyRows], end=" = 0.0"):
-    if not __change_equation(token_equations):
+def __print_row_equation(message: str, token_equations: List[PolyRows], argv, end=" = 0.0"):
+    if not __change_equation(token_equations) or "-d" not in argv:
         return
     color = ['\033[0m', '\033[91m', '\033[92m', '\033[94m']
     if end == "red":
@@ -118,40 +118,40 @@ def calculate_operator(tokens_list: List[PolyRows], option) -> List[PolyRows]:
     return tokens_list
 
 
-def process_equation(tokens_list: List[PolyRows]):
-    __print_row_equation("The full equation refactored", tokens_list, "")
+def process_equation(tokens_list: List[PolyRows], argv):
+    __print_row_equation("Red for modification and green for the movement of the token.\nThe full equation refactored", tokens_list, argv, "")
 
     tokens_list = [token for token in tokens_list if token.coef != 0]
     tokens_list = __reset_position(tokens_list)
     for i, token in enumerate(tokens_list):
         token.create_term(i)
     __print_row_equation("The equation without all the null degree and coefficient and the signs simplified",
-                         tokens_list, "")
+                         tokens_list, argv, "")
 
     while __operator_finder(tokens_list, ["*", "/"]):
         calculate_operator(tokens_list, 0)
-    __print_row_equation("The equation with all the multiplication's term simplified", tokens_list, "")
+    __print_row_equation("The equation with all the multiplication's term simplified", tokens_list, argv, "")
 
     for i, token in enumerate(tokens_list):
         token.change_sign_form_equal(i)
         token.change = True
-    __print_row_equation("The equation with all term in the same side", tokens_list, "red")
+    __print_row_equation("The equation with all term in the same side", tokens_list, argv, "red")
 
     tokens_list = sorted(tokens_list, key=lambda token: token.degree, reverse=True)
     tokens_list = __reset_position(tokens_list)
     for i, token in enumerate(tokens_list):
         token.create_term(i)
-    __print_row_equation("The equation sorted by degree", tokens_list)
+    __print_row_equation("The equation sorted by degree", tokens_list, argv)
 
     while __operator_finder(tokens_list, ["+", "-"]) and not __definitive_form_checker(tokens_list):
         calculate_operator(tokens_list, 1)
-    __print_row_equation("The equation with all the addition's term simplified", tokens_list)
+    __print_row_equation("The equation with all the addition's term simplified", tokens_list, argv)
 
     tokens_list = [token for token in tokens_list if token.coef != 0]
     tokens_list = __reset_position(tokens_list)
     for i, token in enumerate(tokens_list):
         token.create_term(i)
     __print_row_equation("The equation without all the null degree and coefficient and the signs simplified",
-                         tokens_list)
+                         tokens_list, argv)
 
     return resolver(tokens_list)

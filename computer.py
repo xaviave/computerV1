@@ -45,13 +45,13 @@ def graph_drawer(a, b, c):
 
 
 if __name__ == "__main__":
-    parsed_equations_list, graph = parser()
+    parsed_equations_list, argv = parser()
 
     graph_value = []
     for i, parsed_equation in enumerate(parsed_equations_list):
-        graph_value.append(process_equation(parsed_equation))
+        graph_value.append(process_equation(parsed_equation, argv))
         if i < len(parsed_equations_list) - 1:
             print("\n\n")
-    if graph:
+    if "-g" in argv:
         for g in graph_value:
             graph_drawer(g[0], g[1], g[2])

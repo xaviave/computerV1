@@ -11,22 +11,22 @@ def __check_argv():
 
     :return: list of the argv to parse
     """
-    graph = 0
+    argv = []
     if len(sys.argv) < 2:
         raise ParserError("Not enough argument")
 
     exception_char = re.compile(r"[\s\dX\+\-\/\*\=\^\.]+")
     for av in sys.argv[1:]:
         bad_char = exception_char.match(av)
-        print("---- ", bad_char)
-        if av == "-g":
-            graph = 1
-            sys.argv.remove("-g")
-        elif not bad_char:
+        print(bad_char)
+        if av == "-g" or av == "-d":
+            argv.append(av)
+            sys.argv.remove(av)
+        elif not bad_char or bad_char.span(0)[1] != len(av):
             raise ParserError(f"Bad characters in the equation : '{av}' | Only number, 'X', '/', '*', '+', '-', '.', '^' and '=' are authorized")
         elif av.count('=') != 1:
-            raise ParserError(f"The equation isn't mathematics: there's {av.count('=') - 1} much \'=\' in the arg: {av}")
-    return sys.argv[1:], graph
+            raise ParserError(f"The equation isn't mathematics: there's {av.count('=')} \'=\' in the arg: {av}")
+    return sys.argv[1:], argv
 
 
 def __parse_equation(norm_regex, equation: str) -> list:

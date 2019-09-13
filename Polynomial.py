@@ -47,8 +47,10 @@ class PolyRows:
         self.position = position
         self.equal = "= " if equal else ""
 
-        if (tokens_tuple[0] in ["=", "*", "/"] and position == 0) or (not tokens_tuple[0] and position > 0):
-            raise ParserError(f"The equation can't start with this operator : '{tokens_tuple[0]}', '{tokens_tuple[1]}{tokens_tuple[2]}{tokens_tuple[3]}'")
+        if tokens_tuple[0] in ["=", "*", "/"] and position == 0:
+            raise ParserError(f"The equation can't start with this operator : '{tokens_tuple[0]}', '{tokens_tuple[1]}{tokens_tuple[2]}^{tokens_tuple[3]}'")
+        elif not tokens_tuple[0] and position > 0:
+            raise ParserError(f"The operator is missing next to this token: '{tokens_tuple[1]}{tokens_tuple[2]}^{tokens_tuple[3]}'")
         if tokens_tuple[0] not in ["-", "+", "=", "*", "/", ""]:
             raise ParserError(f"Bad or absent operator at position {position * 4}")
         elif tokens_tuple[0] in ["=", ""]:
@@ -62,9 +64,7 @@ class PolyRows:
             raise ParserError(f"Bad or absent operator at position {position * 4 + position}")
         else:
             self.coef = float(re.sub(r"\s*", "", tokens_tuple[1]))
-
         self.create_term(position)
-        #print(f"equal = '{self.equal}', operator = '{self.operator}', coef = '{self.coef}', degree = '{self.degree}' | '{self.term}'")
 
     def __str__(self):
         return self.term

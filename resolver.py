@@ -13,7 +13,7 @@ def __pgcd(number1: int, number2: int) -> int:
 
 def __opti_fraction(number: float) -> str:
     sign = "" if number > 0 else "- "
-    number = abs(number)
+    number = abs(round(number, 5))
     number2 = 10
     for i in range(len(str(number)[str(number).find('.'):]) - 1):
         number2 *= 10
@@ -61,7 +61,7 @@ def __find_complexe_solution(a: float, b: float, c: float):
     else:
         sol1 = __opti_fraction((-b + __square_root(delta)) / (2 * a))
         sol2 = __opti_fraction((-b - __square_root(delta)) / (2 * a))
-        print(f"Delta = {delta} > 0 so there's two solutions.\nThe solutions of the equation are : X1 = {sol1} ({(-b + __square_root(delta)) / (2 * a)}) and X2 = {sol2} ({(-b - __square_root(delta)) / (2 * a)})")
+        print(f"Delta = {delta} > 0 so there's two solutions.\nThe solutions of the equation are : X1 = {sol1} ({round((-b + __square_root(delta)) / (2 * a), 5)}) and X2 = {sol2} ({round((-b - __square_root(delta)) / (2 * a), 5)})")
 
 
 def resolver(tokens_list: List[PolyRows]) -> list:
