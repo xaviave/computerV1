@@ -1,5 +1,6 @@
 from typing import List
 
+from Error_handler import ParserError
 from Polynomial import PolyRows
 
 
@@ -55,16 +56,27 @@ def __square_root(number: float) -> float:
 def __find_complexe_solution(a: float, b: float, c: float):
     delta = __delta_process(a, b, c)
     if delta < 0:
-        print("Delta is inferior to 0, the equation isn't rationnal so it can't be resolved in the program")
+        sol1 = f"(- {b} - i√{delta}) / {2 * a}"
+        sol2 = f"(- {b} + i√{delta}) / {2 * a}"
+        print(f"Delta = {delta} < 0 so there's two solutions.\nThe solutions of the equation are : X1 = {sol1} and X2 = {sol2}")
     elif delta == 0:
-        print(f"Delta = 0 so there's one solution.\nThe solution of the equation is : X = {__opti_fraction(-b / 2 * a)}")
+        print(f"Delta = 0 so there's one solution.\nThe solution of the equation is : X = {__opti_fraction(-b / (2 * a))}")
     else:
         sol1 = __opti_fraction((-b + __square_root(delta)) / (2 * a))
         sol2 = __opti_fraction((-b - __square_root(delta)) / (2 * a))
         print(f"Delta = {delta} > 0 so there's two solutions.\nThe solutions of the equation are : X1 = {sol1} ({round((-b + __square_root(delta)) / (2 * a), 5)}) and X2 = {sol2} ({round((-b - __square_root(delta)) / (2 * a), 5)})")
 
 
+def __check_degree(tokens_list: List[PolyRows]):
+    for token in tokens_list:
+        if token.degree > 2 or token.degree < 0 or "." in str(token.degree):
+            token.create_term(token.position)
+            raise ParserError(
+                f"The degree must be inferior or equal to 2, here : {token.degree} in this term: '{token.term}'")
+
+
 def resolver(tokens_list: List[PolyRows]) -> list:
+    __check_degree(tokens_list)
     a = 0
     b = 0
     c = 0

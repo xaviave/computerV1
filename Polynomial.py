@@ -29,9 +29,6 @@ class PolyRows:
 
         try:
             self.degree = int(re.sub(r"\s*", "", tokens_tuple[3]))
-            if self.degree > 2 or self.degree < 0:
-                self.create_term(self.position)
-                raise ParserError(f"The degree must be inferior or equal to 2, here : {self.degree} in this term: '{self.term}'")
         except ValueError:
             self.degree = 1
 
