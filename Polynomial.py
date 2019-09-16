@@ -28,10 +28,8 @@ class PolyRows:
             self.coef = float(re.sub(r"\s*", "", tokens_tuple[1]))
 
         try:
-            if '.' in tokens_tuple[3]:
-                raise ParserError(f"The degree is a float, it musts be an integer : {tokens_tuple}")
             self.degree = int(re.sub(r"\s*", "", tokens_tuple[3]))
-            if self.degree > 2:
+            if self.degree > 2 or self.degree < 0:
                 self.create_term(self.position)
                 raise ParserError(f"The degree must be inferior or equal to 2, here : {self.degree} in this term: '{self.term}'")
         except ValueError:
@@ -52,7 +50,7 @@ class PolyRows:
         elif not tokens_tuple[0] and position > 0:
             raise ParserError(f"The operator is missing next to this token: '{tokens_tuple[1]}{tokens_tuple[2]}^{tokens_tuple[3]}'")
         if tokens_tuple[0] not in ["-", "+", "=", "*", "/", ""]:
-            raise ParserError(f"Bad or absent operator at position {position * 4}")
+            raise ParserError(f"Bad or absent operator int the token {tokens_tuple}")
         elif tokens_tuple[0] in ["=", ""]:
             self.operator = "+"
         else:
@@ -61,7 +59,9 @@ class PolyRows:
         if tokens_tuple[2] == "X":
             self.__get_degree(tokens_tuple)
         elif tokens_tuple[2] or tokens_tuple[3]:
-            raise ParserError(f"Bad or absent operator at position {position * 4 + position}")
+            raise ParserError(f"Bad or absent operator int the token {tokens_tuple}")
+        elif not tokens_tuple[1]:
+            raise ParserError(f"Bad or absent coefficient int the token {tokens_tuple}")
         else:
             self.coef = float(re.sub(r"\s*", "", tokens_tuple[1]))
         self.create_term(position)

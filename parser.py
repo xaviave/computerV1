@@ -18,7 +18,6 @@ def __check_argv():
     exception_char = re.compile(r"[\s\dX\+\-\/\*\=\^\.]+")
     for av in sys.argv[1:]:
         bad_char = exception_char.match(av)
-        print(bad_char)
         if av == "-g" or av == "-d":
             argv.append(av)
             sys.argv.remove(av)
@@ -47,7 +46,7 @@ def parser():
     equations_list, graph = __check_argv()
 
     equations_token_list = []
-    norm_regex = re.compile(r"\s*(?P<signe>[\*\/\+\-\=\s])?\s*(?:(?P<coef>(?:-\s*)?\d+(?:\.\d+)?)?\s*(?:(?:\*)?\s*(?P<x>X)\s*(?:\^\s*(?P<degree>(?:-\s*)?\d+(?:\.\d+)?))?)?)")
+    norm_regex = re.compile(r"\s*(?P<signe>[\*\/\+\-\=\s])?\s*(?:(?P<coef>(?:-\s*)?\d+(?:\.\d+)?)?\s*(?:(?:\*)?\s*(?P<x>X)\s*(?:\^\s*(?P<degree>(?:-\s*)?\d+))?)?)")
     for equation in equations_list:
         equations_token_list.append(__parse_equation(norm_regex, equation))
     return equations_token_list, graph
